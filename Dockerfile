@@ -1,5 +1,7 @@
-# Change from standard python:3.12 (or debian) to python:3.12-slim
 FROM python:3.12-slim
+
+# Force upgrade OS packages to pull upstream security fixes
+RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
