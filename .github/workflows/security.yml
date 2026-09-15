@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   security-scan:
-    name: DevSecOps Security Pipeline
+    name: DevSecOps Security Scan
     runs-on: ubuntu-latest
 
     steps:
