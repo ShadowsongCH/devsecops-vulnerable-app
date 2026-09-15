@@ -1,8 +1,5 @@
 version: 2
 updates:
-  # -------------------------------------------------------------
-  # 1. Python Dependencies (pip / requirements.txt)
-  # -------------------------------------------------------------
   - package-ecosystem: "pip"
     directory: "/"
     schedule:
@@ -10,6 +7,8 @@ updates:
       day: "monday"
       time: "09:00"
       timezone: "Asia/Colombo"
+    cooldown:
+      default-days: 7
     open-pull-requests-limit: 10
     target-branch: "main"
     labels:
@@ -19,9 +18,6 @@ updates:
     commit-message:
       prefix: "build(deps)"
 
-  # -------------------------------------------------------------
-  # 2. Docker Base Images (Dockerfile)
-  # -------------------------------------------------------------
   - package-ecosystem: "docker"
     directory: "/"
     schedule:
@@ -29,6 +25,8 @@ updates:
       day: "monday"
       time: "09:00"
       timezone: "Asia/Colombo"
+    cooldown:
+      default-days: 7
     open-pull-requests-limit: 5
     target-branch: "main"
     labels:
@@ -38,9 +36,6 @@ updates:
     commit-message:
       prefix: "build(docker)"
 
-  # -------------------------------------------------------------
-  # 3. GitHub Actions Workflows (.github/workflows)
-  # -------------------------------------------------------------
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
@@ -48,6 +43,8 @@ updates:
       day: "monday"
       time: "09:00"
       timezone: "Asia/Colombo"
+    cooldown:
+      default-days: 7
     open-pull-requests-limit: 5
     target-branch: "main"
     labels:
