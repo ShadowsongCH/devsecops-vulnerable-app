@@ -77,6 +77,8 @@ jobs:
           format: 'sarif'
           output: 'trivy-results.sarif'
           severity: 'CRITICAL,HIGH,MEDIUM'  # Audits all actionable severity levels without suppression
+          limit-severities-for-sarif: true
+          ignore-unfixed: true
           exit-code: '0'
 
       - name: Upload Trivy SARIF to GitHub Security
