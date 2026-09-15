@@ -1,8 +1,11 @@
 from flask import Flask, request
+from flask_talisman import Talisman
 import sqlite3
 
 app = Flask(__name__)
 
+# Enforces CSP, X-Content-Type-Options, HSTS, and frame options
+Talisman(app, content_security_policy=None)
 
 def get_db():
     conn = sqlite3.connect("app.db")

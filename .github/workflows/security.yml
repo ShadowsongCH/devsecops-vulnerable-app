@@ -9,6 +9,7 @@ on:
 permissions:
   contents: read
   security-events: write  # Required to upload SARIF reports to GitHub Code Security
+  issues: write           # Allow OWASP ZAP to open GitHub Issues
 
 jobs:
   security-scan:
@@ -35,7 +36,6 @@ jobs:
       - name: Run Semgrep SAST
         run: |
           semgrep scan --config=auto --sarif --output=semgrep.sarif
-        continue-on-error: true
 
       - name: Upload Semgrep SARIF to GitHub Security
         uses: github/codeql-action/upload-sarif@v3
@@ -76,7 +76,7 @@ jobs:
           image-ref: 'vulnerable-app:test'
           format: 'sarif'
           output: 'trivy-results.sarif'
-          severity: 'CRITICAL,HIGH'
+          severity: 'CRITICAL,HIGH,MEDIUM'  # Audits all actionable severity levels without suppression
           exit-code: '0'
 
       - name: Upload Trivy SARIF to GitHub Security
@@ -102,7 +102,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           target: 'http://localhost:5000'
           issue_title: 'OWASP ZAP DAST Vulnerability Report'
-          fail_action: false # Set to true to break pipeline on WARN/FAIL findings
+          fail_action: true # Set to true to break pipeline on WARN/FAIL findings
 
       - name: Stop Application Container
         if: always()
