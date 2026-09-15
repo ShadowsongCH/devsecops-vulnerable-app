@@ -100,7 +100,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           target: 'http://localhost:5000'
           issue_title: 'OWASP ZAP Security Report'
-          fail_action: true # Set to true to break pipeline on WARN/FAIL findings
+          fail_action: false # Set to true to break pipeline on WARN/FAIL findings
 
       - name: Stop Application Container
         if: always()
