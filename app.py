@@ -4,6 +4,19 @@ import sqlite3
 
 app = Flask(__name__)
 
+Talisman(
+    app,
+    force_https=False,
+    content_security_policy=None
+)
+
+@app.route('/')
+def home():
+    return "App is running securely!"
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)
+
 # Enforces CSP, X-Content-Type-Options, HSTS, and frame options
 Talisman(app, content_security_policy=None)
 
