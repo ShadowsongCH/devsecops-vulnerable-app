@@ -2,7 +2,7 @@
 # FROM python:3.12
 
 # Use the hardened minimal slim base:
-FROM python:3.12-slim
+FROM python:3.14-slim
 
 # Prevent Python from writing pyc files to disk and buffering stdout/stderr
 ENV PYTHONDONTWRITEBYTECODE=1 \
