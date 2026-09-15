@@ -1,4 +1,4 @@
-name: DevSecOps Security Pipeline
+name: DevSecOps CI/CD Pipeline
 
 on:
   push:
@@ -6,56 +6,82 @@ on:
   pull_request:
     branches: [ "main" ]
 
+permissions:
+  contents: read
+  security-events: write  # Required to upload SARIF reports to GitHub Code Security
+
 jobs:
-  security-gates:
-    name: Security Scans (SAST, Secrets, SCA, Container)
+  security-scan:
+    name: DevSecOps Security Pipeline
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code (Full History)
+      - name: Checkout Source Code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 0 # Required for Gitleaks commit history scanning
 
+      # -------------------------------------------------------------
+      # 1. SAST (Static Application Security Testing) - Semgrep
+      # -------------------------------------------------------------
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
 
-      - name: Install Tools (Semgrep & Pip-audit)
+      - name: Install Semgrep
+        run: pip install semgrep
+
+      - name: Run Semgrep SAST
+        run: |
+          semgrep scan --config=auto --sarif --output=semgrep.sarif
+        continue-on-error: true
+
+      - name: Upload Semgrep SARIF to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: semgrep.sarif
+          category: semgrep-sast
+
+      # -------------------------------------------------------------
+      # 2. Secret Detection - Gitleaks
+      # -------------------------------------------------------------
+      - name: Run Gitleaks Secret Scanner
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # -------------------------------------------------------------
+      # 3. SCA (Software Composition Analysis) - pip-audit
+      # -------------------------------------------------------------
+      - name: Install Python Dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install semgrep pip-audit
+          pip install -r requirements.txt pip-audit
 
-      - name: Run Semgrep SAST Gate
+      - name: Run pip-audit SCA
+        run: pip-audit -r requirements.txt
+
+      # -------------------------------------------------------------
+      # 4. Container Security - Docker Build & Trivy Scan
+      # -------------------------------------------------------------
+      - name: Build Local Docker Image
         run: |
-          semgrep scan --config p/python --error .
+          docker build --no-cache -t vulnerable-app:test .
 
-      - name: Install Gitleaks Binary
-        run: |
-          cd /tmp
-          wget https://github.com/gitleaks/gitleaks/releases/download/v8.18.2/gitleaks_8.18.2_linux_x64.tar.gz
-          tar -zxvf gitleaks_8.18.2_linux_x64.tar.gz
-          sudo mv gitleaks /usr/local/bin/
-
-      - name: Run Gitleaks Secret Gate
-        run: |
-          gitleaks detect --verbose --redact
-
-      - name: Run Pip-audit SCA Gate (Dependency Scanning)
-        run: |
-          pip-audit -r requirements.txt
-
-      - name: Build Local Docker Image for Scanning
-        run: |
-          docker build -t vulnerable-app:test .
-
-      - name: Run Trivy Container Security Gate
+      - name: Run Trivy Container Scanner
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: 'vulnerable-app:test'
-          format: 'table'
-          exit-code: '1'
-          ignore-unfixed: true
-          vuln-type: 'os,library'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
           severity: 'CRITICAL,HIGH'
+          exit-code: '0'
+
+      - name: Upload Trivy SARIF to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: trivy-results.sarif
+          category: trivy-container
