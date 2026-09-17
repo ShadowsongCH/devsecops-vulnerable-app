@@ -2,7 +2,9 @@ name: DevSecOps CI/CD Pipeline
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
+      - 'test/*'
   pull_request:
     branches: [ "main" ]
 
@@ -111,3 +113,15 @@ jobs:
         run: |
           docker stop test-app || true
           docker rm test-app || true
+
+      # -------------------------------------------------------------
+      # 6. Real-Time Alert Notifications
+      # -------------------------------------------------------------
+      - name: Send Discord/Teams Alert on Failure
+        if: failure()
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          SLACK_COLOR: 'danger'
+          SLACK_TITLE: 'DevSecOps Pipeline Failure'
+          SLACK_MESSAGE: 'Security quality gate failed on branch: ${{ github.ref_name }}'
