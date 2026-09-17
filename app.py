@@ -31,10 +31,7 @@ def apply_additional_security_headers(response):
     return response
 
 # Connection string (defaults to local/CI Floci emulator)
-CONN_STR = os.getenv(
-    "CONN_STR",
-    "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=REDACTED-DEV-SECRET;BlobEndpoint=http://localhost:4577/devstoreaccount1;"
-)
+CONN_STR = "REPLACE_WITH_SECURE_SECRET"
 
 CONTAINER_NAME = "secure-vault"
 

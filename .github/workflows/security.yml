@@ -79,7 +79,7 @@ jobs:
           docker build --no-cache -t vulnerable-app:test .
 
       - name: Run Trivy Container Scanner
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: 'vulnerable-app:test'
           format: 'sarif'
@@ -129,7 +129,7 @@ jobs:
       # -------------------------------------------------------------
       - name: Test Azure Storage Integration in CI
         env:
-          CONN_STR: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=REDACTED-DEV-SECRET;BlobEndpoint=http://localhost:4577/devstoreaccount1;"
+          CONN_STR: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
         run: |
           pip install azure-storage-blob
           python -c "
