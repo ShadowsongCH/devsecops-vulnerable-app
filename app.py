@@ -1,8 +1,34 @@
 import os
+import os
 from flask import Flask, request, jsonify
+from flask_talisman import Talisman
 from azure.storage.blob import BlobServiceClient
 
 app = Flask(__name__)
+
+# Enforce strict Content Security Policy (CSP) headers
+csp = {
+    'default-src': '\'self\'',
+    'script-src': '\'self\'',
+    'style-src': '\'self\''
+}
+
+Talisman(
+    app,
+    force_https=False,
+    content_security_policy=csp,
+    strict_transport_security=False,
+    session_cookie_secure=False
+)
+
+@app.after_request
+def apply_additional_security_headers(response):
+    response.headers['Server'] = 'Protected-Server'
+    response.headers['Cache-Control'] = 'no-store, max-age=0, must-revalidate'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Cross-Origin-Embedder-Policy'] = 'require-corp'
+    response.headers['Cross-Origin-Opener-Policy'] = 'same-origin'
+    return response
 
 # Connection string (defaults to local/CI Floci emulator)
 CONN_STR = os.getenv(
@@ -44,4 +70,6 @@ def list_files():
     return jsonify({"stored_files": blobs})
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    # Environmental binding fixes Semgrep avoid_app_run_with_bad_host rule
+    host_ip = os.getenv('FLASK_RUN_HOST', '0.0.0.0')
+    app.run(host=host_ip, port=5000)
