@@ -14,7 +14,7 @@ jobs:
   security-scan:
     name: DevSecOps Security Pipeline
     runs-on: ubuntu-latest
-    
+
     services:
       floci-az:
         image: floci/floci-az:latest
@@ -22,7 +22,7 @@ jobs:
           - 4577:4577
           - 5672:5672
           - 5673:5673
-    
+
     steps:
       - name: Checkout Source Code
         uses: actions/checkout@v4
@@ -119,7 +119,7 @@ jobs:
           docker rm flask-app || true
 
       # -------------------------------------------------------------
-      # 7. floci Azure
+      # 7. Floci Azure Integration Test
       # -------------------------------------------------------------
       - name: Test Azure Storage Integration in CI
         env:
