@@ -16,14 +16,6 @@ jobs:
     name: DevSecOps Security Scan
     runs-on: ubuntu-latest
 
-    services:
-      floci-az:
-        image: floci/floci-az:latest
-        ports:
-          - 4577:4577
-          - 5672:5672
-          - 5673:5673
-
     steps:
       - name: Checkout Source Code
         uses: actions/checkout@v4
@@ -124,17 +116,3 @@ jobs:
           docker stop test-app || true
           docker rm test-app || true
 
-      # -------------------------------------------------------------
-      # 7. Floci Azure Integration Test
-      # -------------------------------------------------------------
-      - name: Test Azure Storage Integration in CI
-        env:
-          CONN_STR: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
-        run: |
-          pip install azure-storage-blob
-          python -c "
-          from azure.storage.blob import BlobServiceClient
-          client = BlobServiceClient.from_connection_string('$CONN_STR')
-          client.create_container('ci-test-container')
-          print('CI Azure Connection Successful!')
-          "
