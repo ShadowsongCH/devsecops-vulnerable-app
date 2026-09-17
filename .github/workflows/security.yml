@@ -79,22 +79,23 @@ jobs:
           docker build --no-cache -t vulnerable-app:test .
 
       - name: Run Trivy Container Scanner
-        uses: aquasecurity/trivy-action@v0.35.0
+        uses: aquasecurity/trivy-action@master
         with:
           image-ref: 'vulnerable-app:test'
           format: 'sarif'
           output: 'trivy-results.sarif'
-          severity: 'CRITICAL,HIGH,MEDIUM'  # Audits all actionable severity levels without suppression
-          limit-severities-for-sarif: true
-          ignore-unfixed: true
+          severity: 'CRITICAL,HIGH'
+          limit-severities-for-sarif: false
           exit-code: '0'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload Trivy SARIF to GitHub Security
         uses: github/codeql-action/upload-sarif@v3
         if: always()
         with:
-          sarif_file: trivy-results.sarif
-          category: trivy-container
+          sarif_file: 'trivy-results.sarif'
+          category: 'trivy-container'
 
       # -------------------------------------------------------------
       # 5. DAST (Dynamic Application Security Testing) - OWASP ZAP
