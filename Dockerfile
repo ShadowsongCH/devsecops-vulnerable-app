@@ -1,5 +1,5 @@
 # Stage 1: Build dependencies
-FROM python:3.12-slim AS builder
+FROM python:3.12-slim-trixie AS builder
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
@@ -15,7 +15,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Stage 2: Hardened runtime container
-FROM python:3.12-slim
+FROM python:3.12-slim-trixie
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
@@ -39,4 +39,4 @@ USER appuser
 
 EXPOSE 5000
 
-CMD ["python", "app.py"]
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app"]
