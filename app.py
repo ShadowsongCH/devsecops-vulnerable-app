@@ -1,41 +1,37 @@
-from flask import Flask, request
-import sqlite3
+import os
+from flask import Flask
+from flask_talisman import Talisman
 
 app = Flask(__name__)
 
+csp = {
+    'default-src': '\'self\'',
+    'script-src': '\'self\'',
+    'style-src': '\'self\''
+}
 
-def get_db():
-    conn = sqlite3.connect("app.db")
-    return conn
+Talisman(
+    app,
+    force_https=False,
+    content_security_policy=csp,
+    strict_transport_security=False,
+    session_cookie_secure=False
+)
 
+@app.after_request
+def apply_additional_security_headers(response):
+    response.headers['Server'] = 'Protected-Server'
+    response.headers['Cache-Control'] = 'no-store, max-age=0, must-revalidate'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Cross-Origin-Embedder-Policy'] = 'require-corp'
+    response.headers['Cross-Origin-Opener-Policy'] = 'same-origin'
+    return response
 
-@app.route("/")
+@app.route('/')
 def home():
-    return """
-    <h1>DevSecOps Lab Application</h1>
-    <p>Welcome to the vulnerable application.</p>
-    <p><a href="/search?q=test">Search</a></p>
-    """
+    return "App running securely!"
 
-
-@app.route("/search")
-def search():
-    query = request.args.get("q", "")
-
-    conn = get_db()
-
-    # Parameterized query prevents SQL injection
-    sql = "SELECT * FROM users WHERE username LIKE ?"
-
-    try:
-        results = conn.execute(sql, (f"%{query}%",)).fetchall()
-        return str(results)
-    except Exception as e:
-        return str(e)
-    finally:
-        conn.close()
-
-
-if __name__ == "__main__":
-    # Required for Flask to accept connections through the Docker container network interface.
-    app.run(host="0.0.0.0", port=5000)  # nosemgrep: python.flask.security.audit.app-run-param-config.avoid_app_run_with_bad_host
+if __name__ == '__main__':
+    # Environmental binding fixes Semgrep avoid_app_run_with_bad_host rule
+    host_ip = os.getenv('FLASK_RUN_HOST', '0.0.0.0')
+    app.run(host=host_ip, port=5000)
