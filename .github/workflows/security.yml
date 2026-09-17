@@ -35,7 +35,7 @@ jobs:
 
       - name: Run Semgrep SAST
         run: |
-          semgrep scan --config=auto --sarif --output=semgrep.sarif
+          semgrep scan --config=auto --sarif --output=semgrep.sarif --error
 
       - name: Upload Semgrep SARIF to GitHub Security
         uses: github/codeql-action/upload-sarif@v3

@@ -1,5 +1,4 @@
 import os
-import os
 from flask import Flask, request, jsonify
 from flask_talisman import Talisman
 from azure.storage.blob import BlobServiceClient
@@ -65,6 +64,15 @@ def list_files():
     container_client = blob_service_client.get_container_client(CONTAINER_NAME)
     blobs = [blob.name for blob in container_client.list_blobs()]
     return jsonify({"stored_files": blobs})
+
+@app.route('/search')
+def search():
+    query = request.args.get("q", "")
+
+    # Intentionally vulnerable: SQL injection test for Semgrep
+    sql = "SELECT * FROM users WHERE username LIKE '%" + query + "%'"
+
+    return jsonify({"query": sql})
 
 if __name__ == '__main__':
     # Environmental binding fixes Semgrep avoid_app_run_with_bad_host rule
