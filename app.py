@@ -70,7 +70,7 @@ def search():
     query = request.args.get("q", "")
 
     # Intentionally vulnerable: SQL injection test for Semgrep
-    sql = "SELECT * FROM users WHERE username LIKE '%" + query + "%'"
+    sql = "SELECT * FROM users WHERE username LIKE ?"
 
     return jsonify({"query": sql})
 

@@ -18,7 +18,7 @@ jobs:
 
     steps:
       - name: Checkout Source Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608
         with:
           fetch-depth: 0 # Required for Gitleaks commit history scanning
 
@@ -26,7 +26,7 @@ jobs:
       # 1. SAST (Static Application Security Testing) - Semgrep
       # -------------------------------------------------------------
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
           python-version: '3.12'
 
@@ -38,7 +38,7 @@ jobs:
           semgrep scan --config=auto --sarif --output=semgrep.sarif --error
 
       - name: Upload Semgrep SARIF to GitHub Security
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@c20e34f438d671fc35777cc9820dd7adf8252874
         if: always()
         with:
           sarif_file: semgrep.sarif
@@ -48,7 +48,7 @@ jobs:
       # 2. Secret Detection - Gitleaks
       # -------------------------------------------------------------
       - name: Run Gitleaks Secret Scanner
-        uses: gitleaks/gitleaks-action@v2
+        uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -71,7 +71,7 @@ jobs:
           docker build --no-cache -t vulnerable-app:test .
 
       - name: Run Trivy Container Scanner
-        uses: aquasecurity/trivy-action@v0.36.0
+        uses: aquasecurity/trivy-action@a9c7b0f06e461e9d4b4d1711f154ee024b8d7ab8
         with:
           image-ref: 'vulnerable-app:test'
           format: 'sarif'
@@ -86,7 +86,7 @@ jobs:
         run: ls -la trivy-results.sarif
 
       - name: Upload Trivy SARIF to GitHub Security
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@c20e34f438d671fc35777cc9820dd7adf8252874
         if: always()
         with:
           sarif_file: 'trivy-results.sarif'
@@ -103,7 +103,7 @@ jobs:
           curl -I http://localhost:5000 || exit 1
 
       - name: Run OWASP ZAP Baseline Scan
-        uses: zaproxy/action-baseline@v0.14.0
+        uses: zaproxy/action-baseline@2b5fc7f98d837319798ab7f128ea50b7d40563b6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           target: 'http://localhost:5000'
