@@ -6,7 +6,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-# Upgrade system packages and install build dependencies
+# Upgrade system packages and install build dependencies in a single layer
 RUN apt-get update && apt-get upgrade -y && \
     apt-get install -y --no-install-recommends curl && \
     rm -rf /var/lib/apt/lists/*
@@ -26,10 +26,10 @@ WORKDIR /app
 RUN apt-get update && apt-get upgrade -y && \
     rm -rf /var/lib/apt/lists/*
 
-# Create a dedicated non-root execution user and group
+# Create dedicated non-root execution user
 RUN groupadd -r appuser && useradd -r -g appuser appuser
 
-# Copy python packages and binaries from builder
+# Copy packages from builder stage
 COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
 COPY --from=builder /usr/local/bin /usr/local/bin
 COPY app.py .
