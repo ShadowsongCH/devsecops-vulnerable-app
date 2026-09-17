@@ -70,7 +70,7 @@ jobs:
         run: |
           docker build --no-cache -t vulnerable-app:test .
 
-      - name: Run Trivy Container Scanner
+      - name: Generate Trivy Container Report
         uses: aquasecurity/trivy-action@a9c7b0f06e461e9d4b4d1711f154ee024b8d7ab8
         with:
           image-ref: 'vulnerable-app:test'
@@ -78,8 +78,8 @@ jobs:
           output: 'trivy-results.sarif'
           severity: 'CRITICAL,HIGH'
           ignore-unfixed: true
-          limit-severities-for-sarif: false
-          exit-code: '1'
+          limit-severities-for-sarif: true
+          exit-code: '0'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -92,6 +92,17 @@ jobs:
         with:
           sarif_file: 'trivy-results.sarif'
           category: 'trivy-container'
+
+      - name: Enforce Trivy Security Gate
+        uses: aquasecurity/trivy-action@a9c7b0f06e461e9d4b4d1711f154ee024b8d7ab8
+        with:
+          image-ref: 'vulnerable-app:test'
+          format: 'table'
+          severity: 'CRITICAL,HIGH'
+          ignore-unfixed: true
+          exit-code: '1'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # -------------------------------------------------------------
       # 5. DAST (Dynamic Application Security Testing) - OWASP ZAP
