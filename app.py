@@ -35,3 +35,4 @@ if __name__ == '__main__':
     # Environmental binding fixes Semgrep avoid_app_run_with_bad_host rule
     host_ip = os.getenv('FLASK_RUN_HOST', '0.0.0.0')
     app.run(host=host_ip, port=5000)
+INVALID_SYNTAX_FAIL_TEST
