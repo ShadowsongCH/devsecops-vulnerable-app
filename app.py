@@ -49,7 +49,7 @@ def apply_additional_security_headers(response):
     return response
 
 # Connection string (defaults to local/CI Floci emulator)
-CONN_STR = "REPLACE_WITH_SECURE_SECRET"
+CONN_STR = os.getenv("AZURE_STORAGE_CONNECTION_STRING")
 
 CONTAINER_NAME = "secure-vault"
 
