@@ -12,6 +12,9 @@ spec:
       labels:
         app: vulnerable-app
     spec:
+      serviceAccountName: vulnerable-app-sa
+      automountServiceAccountToken: false
+
       securityContext:
         runAsUser: 999
         runAsGroup: 999
@@ -21,7 +24,15 @@ spec:
 
       containers:
         - name: vulnerable-app
-          image: ghcr.io/shadowsongch/devsecops-vulnerable-app:a93fd320d7adc27fc4228e7f86c3536a3dd13c0e
+          image: ghcr.io/shadowsongch/devsecops-vulnerable-app:b4c607076b24b71b34124ce3cdfd74d4236db854
+
+          env:
+            - name: AZURE_STORAGE_CONNECTION_STRING
+              valueFrom:
+                secretKeyRef:
+                  name: azure-storage-secret
+                  key: connection-string
+
           ports:
             - containerPort: 5000
 
